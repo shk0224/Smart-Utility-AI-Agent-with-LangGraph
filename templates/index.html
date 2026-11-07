@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Smart Utility AI</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color: #172033; background: #f5f7fb; }
+    body { max-width: 820px; margin: 48px auto; padding: 0 20px; }
+    h1 { margin-bottom: 4px; } .sub { color: #59657b; }
+    .panel { background: white; border: 1px solid #dfe4ed; border-radius: 14px; padding: 24px; margin: 20px 0; box-shadow: 0 3px 16px #14243c0b; }
+    textarea { width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid #cdd5e1; border-radius: 8px; font: inherit; min-height: 95px; }
+    button { background: #2459d1; color: white; border: 0; border-radius: 8px; padding: 12px 20px; margin-top: 12px; cursor: pointer; font: inherit; }
+    button:disabled { opacity: .6; cursor: wait; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f3f5f9; padding: 14px; border-radius: 8px; }
+    .trace { border-left: 3px solid #2459d1; padding: 8px 14px; margin: 12px 0; background: #f7f9fd; }
+    .hint { color: #59657b; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <h1>Smart Utility AI</h1>
+  <p class="sub">One OpenAI agent · Four Python tools · Transparent tool execution</p>
+  <div class="panel">
+    <label for="question"><strong>Ask a question</strong></label>
+    <textarea id="question" placeholder="e.g. I was born on 1995-03-15. How old am I?" maxlength="2000"></textarea>
+    <button id="send">Ask Agent</button>
+    <p class="hint">Try BMI, age, date differences, or arithmetic. You can combine requests.</p>
+  </div>
+  <div class="panel" id="output" hidden>
+    <h2>Answer</h2><div id="answer"></div>
+    <h2>Tool Execution Trace</h2><div id="trace"></div>
+  </div>
+  <script>
+    const button = document.getElementById('send');
+    button.addEventListener('click', async () => {
+      const question = document.getElementById('question').value.trim();
+      if (!question) return;
+      button.disabled = true; button.textContent = 'Thinking...';
+      document.getElementById('output').hidden = false;
+      document.getElementById('answer').textContent = 'Working...';
+      document.getElementById('trace').replaceChildren();
+      try {
+        const response = await fetch('/api/ask', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Request failed');
+        document.getElementById('answer').textContent = data.answer;
+        const trace = document.getElementById('trace');
+        if (!data.trace.length) trace.textContent = 'No tool was needed for this question.';
+        data.trace.forEach(step => {
+          const box = document.createElement('div'); box.className = 'trace';
+          const title = document.createElement('strong');
+          title.textContent = step.type === 'tool_call' ? `Tool called: ${step.tool}` : `Tool result: ${step.tool}`;
+          const detail = document.createElement('pre');
+          detail.textContent = JSON.stringify(step.arguments ?? step.result, null, 2);
+          box.append(title, detail); trace.append(box);
+        });
+      } catch (error) { document.getElementById('answer').textContent = `Error: ${error.message}`; }
+      finally { button.disabled = false; button.textContent = 'Ask Agent'; }
+    });
+  </script>
+</body>
+</html>
