@@ -214,7 +214,7 @@ def calculator_tool_node(state: UtilityState):
 # =========================
 
 TOOL_NODE_NAMES = {
-    "calculate_age": "age_tool",
+    "calculate_age": "age_tool",   # "calculate_age" (Tool Name) → "age_tool" (Node Name)
     "calculate_bmi": "bmi_tool",
     "calculate_date_difference": "date_tool",
     "calculate_calculator": "calculator_tool"
