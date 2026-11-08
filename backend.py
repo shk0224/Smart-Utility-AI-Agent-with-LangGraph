@@ -267,6 +267,4 @@ def run_utility_agent(user_input: str):
     return utility_agent(user_input)
 
 
-def run_agent(question: str) -> dict:
-    """Keep the existing FastAPI app.py unchanged."""
-    return run_utility_agent(question)
+
