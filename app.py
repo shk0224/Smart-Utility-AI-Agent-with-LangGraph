@@ -4,9 +4,9 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
-from backend import run_agent
+from backend import run_utility_agent
 
-app = FastAPI(title="Smart Utility AI")
+app = FastAPI(title="Smart Utility AI Agent")
 BASE_DIR = Path(__file__).resolve().parent
 
 
@@ -22,7 +22,7 @@ def home():
 @app.post("/api/ask")
 def ask(request: QuestionRequest):
     try:
-        return run_agent(request.question)
+        return run_utility_agent(request.question)
     except Exception as error:
         raise HTTPException(status_code=500, detail=str(error)) from error
 
